@@ -7,6 +7,8 @@ let feedbackGain; // decay
 let delayTime; // delayTime
 let width; // noiseGain ramping (?)
 let playbackRate;
+let lowpass;
+let highpass;
 let delayNode;
 let noiseGainNode;
 let feedbackNode;
@@ -84,8 +86,8 @@ document.querySelector('button').addEventListener('click', () => {
     noiseGainNode = new GainNode(audioContext, { gain: 0 });
     feedbackNode = new GainNode(audioContext, { gain: feedbackGain });
     noiseNode = new AudioBufferSourceNode(audioContext, { buffer, loop: true, playbackRate });
-    lowpassNode = new BiquadFilterNode(audioContext, { type: 'lowpass', frequency: lowpass, Q: 1 });
-    highpassNode = new BiquadFilterNode(audioContext, { type: 'highpass', frequency: highpass, Q: 1 });
+    lowpassNode = new BiquadFilterNode(audioContext, { type: 'lowpass', frequency: lowpass });
+    highpassNode = new BiquadFilterNode(audioContext, { type: 'highpass', frequency: highpass });
 
     noiseNode.start();
     noiseNode.connect(noiseGainNode);
