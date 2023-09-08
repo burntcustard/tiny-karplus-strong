@@ -11,6 +11,9 @@ let delayNode;
 let noiseGainNode;
 let feedbackNode;
 let noiseNode;
+let lowpassNode;
+let highpassNode;
+let lowshelfNode;
 
 function setFeedbackGain() {
   const newValue = document.querySelector('#decay').value;
@@ -39,15 +42,33 @@ function setPlaybackRate() {
   if (noiseNode) noiseNode.playbackRate.value = playbackRate;
 }
 
+function setLowpass() {
+  const newValue = document.querySelector('#lowpass').value;
+  lowpass = parseFloat(newValue);
+  document.querySelector('#lowpass-indicator').innerText = lowpass;
+  if (lowpassNode) lowpassNode.frequency.value = lowpass;
+}
+
+function setHighpass() {
+  const newValue = document.querySelector('#highpass').value;
+  highpass = parseFloat(newValue);
+  document.querySelector('#highpass-indicator').innerText = highpass;
+  if (highpassNode) highpassNode.frequency.value = highpass;
+}
+
 setFeedbackGain();
 setDelayTime();
 setWidth();
 setPlaybackRate();
+setLowpass();
+setHighpass();
 
 document.querySelector('#decay').addEventListener('input', setFeedbackGain);
 document.querySelector('#delay').addEventListener('input', setDelayTime);
 document.querySelector('#width').addEventListener('input', setWidth);
 document.querySelector('#rate').addEventListener('input', setPlaybackRate);
+document.querySelector('#lowpass').addEventListener('input', setLowpass);
+document.querySelector('#highpass').addEventListener('input', setHighpass);
 
 document.querySelector('button').addEventListener('click', () => {
   if (!audioContext) {
@@ -63,6 +84,8 @@ document.querySelector('button').addEventListener('click', () => {
     noiseGainNode = new GainNode(audioContext, { gain: 0 });
     feedbackNode = new GainNode(audioContext, { gain: feedbackGain });
     noiseNode = new AudioBufferSourceNode(audioContext, { buffer, loop: true, playbackRate });
+    lowpassNode = new BiquadFilterNode(audioContext, { type: 'lowpass', frequency: lowpass, Q: 1 });
+    highpassNode = new BiquadFilterNode(audioContext, { type: 'highpass', frequency: highpass, Q: 1 });
 
     noiseNode.start();
     noiseNode.connect(noiseGainNode);
@@ -70,7 +93,9 @@ document.querySelector('button').addEventListener('click', () => {
     noiseGainNode.connect(delayNode);
     delayNode.connect(feedbackNode);
     feedbackNode.connect(delayNode);
-    feedbackNode.connect(audioContext.destination);
+    feedbackNode.connect(lowpassNode);
+    lowpassNode.connect(highpassNode);
+    highpassNode.connect(audioContext.destination);
   }
 
   noiseGainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
