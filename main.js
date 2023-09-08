@@ -6,7 +6,6 @@ const init = () => audioContext = new AudioContext();
 let feedbackGain; // decay
 let delayTime; // delayTime
 let width; // noiseGain ramping (?)
-let frequency; //
 let delayNode;
 let noiseGainNode;
 let feedbackNode;
@@ -44,13 +43,9 @@ document.querySelector('button').addEventListener('click', () => {
     init();
   }
 
-  const frequency = 300;
-  const duration = 1;
-  const sampleRate = audioContext.sampleRate;
-  const bufferLength = Math.floor(sampleRate / frequency);
-  const buffer = audioContext.createBuffer(1, bufferLength, sampleRate);
+  const buffer = audioContext.createBuffer(1, audioContext.sampleRate, audioContext.sampleRate);
 
-  for (let i = 0; i < bufferLength; i++) {
+  for (let i = 0; i < audioContext.sampleRate; i++) {
     buffer.getChannelData(0)[i] = Math.random() * 2 - 1;
   }
 
@@ -69,6 +64,4 @@ document.querySelector('button').addEventListener('click', () => {
 
   noiseGainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
   noiseGainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + width / 1000);
-
-  noiseNode.stop(audioContext.currentTime + duration);
 });
